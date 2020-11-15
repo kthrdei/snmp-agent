@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "snmp-agent"
+version = "0.1.0"
+description = "SNMP Server"
+authors = ["kthrdei <kthrd.tech@gmail.com>"]
+readme = "README.md"
+keywords = ['snmp', 'snmp-server', 'network']
+license = "MIT"
+repository = "https://github.com/kthrdei/snmp-agent"
+homepage = "https://github.com/kthrdei/snmp-agent"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+asn1 = "^2.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
