@@ -380,8 +380,8 @@ class SNMP(object):
     
     def _to_primitive(self, value):
         if isinstance(value, dict):
-            _dict = value
-            for k, v in _dict.items():
+            _dict = {}
+            for k, v in value.items():
                 _dict[k] = self._to_primitive(v)
             return _dict
         elif isinstance(value, list):
