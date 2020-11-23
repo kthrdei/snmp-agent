@@ -1,4 +1,4 @@
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 from .server import Server
 from .snmp import Integer, Boolean, OctetString, Null, \
@@ -6,4 +6,3 @@ from .snmp import Integer, Boolean, OctetString, Null, \
     TimeTicks, Counter64, NoSuchObject, NoSuchInstance, EndOfMibView, \
     SNMPRequest, SNMPResponse, VariableBinding
 from . import utils
-

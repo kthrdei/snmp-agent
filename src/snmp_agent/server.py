@@ -1,5 +1,6 @@
 from typing import Callable, Awaitable
 import asyncio
+import functools
 import logging
 
 from . import snmp
@@ -20,14 +21,17 @@ class SNMPProtocol(asyncio.BaseProtocol):
 
     async def _handle(self, data, address):
         # Decode request
-        req = snmp.decode_request(data=data)
+        loop = asyncio.get_event_loop()
+        req = await loop.run_in_executor(
+            None, functools.partial(snmp.decode_request, data=data))
         logger.info(f"Received: {req.to_dict()}")
 
         # Callback
         res = await self._handler(req)
 
         # Encode response
-        res_data = snmp.encode_response(response=res)
+        res_data = await loop.run_in_executor(
+            None, functools.partial(snmp.encode_response, response=res))
 
         self.transport.sendto(res_data, address)
         logger.info(f"Responded: {res.to_dict()}")
