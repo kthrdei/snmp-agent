@@ -33,7 +33,7 @@ async def handler(req: snmp_agent.SNMPRequest) -> snmp_agent.SNMPResponse:
     return res
 
 async def main():
-    sv = snmp_agent.Server(handler=handler, host='0.0.0.0')
+    sv = snmp_agent.Server(handler=handler, host='0.0.0.0', port=161)
     await sv.start()
     while True:
         await asyncio.sleep(3600)
