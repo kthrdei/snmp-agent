@@ -24,7 +24,7 @@ class SNMPProtocol(asyncio.BaseProtocol):
         loop = asyncio.get_event_loop()
         req = await loop.run_in_executor(
             None, functools.partial(snmp.decode_request, data=data))
-        logger.info(f"Received: {req.to_dict()}")
+        logger.debug(f"Received: {req.to_dict()}")
 
         # Callback
         res = await self._handler(req)
@@ -34,7 +34,7 @@ class SNMPProtocol(asyncio.BaseProtocol):
             None, functools.partial(snmp.encode_response, response=res))
 
         self.transport.sendto(res_data, address)
-        logger.info(f"Responded: {res.to_dict()}")
+        logger.debug(f"Responded: {res.to_dict()}")
 
 
 class Server(object):
