@@ -1,4 +1,4 @@
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 from .server import Server
 from .snmp import Integer, Boolean, OctetString, Null, \
