@@ -59,4 +59,5 @@ class Server(object):
         logger.info(f"SNMP server is running on {self._host}:{self._port}")
 
     async def stop(self):
-        self._server.close()
+        if self._server is not None:
+            self._server.close()
