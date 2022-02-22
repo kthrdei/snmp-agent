@@ -389,7 +389,7 @@ class SNMP(object):
             for item in value:
                 items.append(self._to_primitive(item))
             return items
-        elif isinstance(value, (int, str, bool)) or value is None:
+        elif isinstance(value, (int, str, bool, bytes)) or value is None:
             return value
         else:
             _dict = {}
