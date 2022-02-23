@@ -130,7 +130,7 @@ class IPAddress(SNMPLeafValue):
         self.tag = ASN1.IPADDRESS
 
     def encode(self) -> bytes:
-        return asn1.Encoder._encode_integer(int(ipaddress.IPv4Address(self.value)))
+        return ipaddress.IPv4Address(self.value).packed
 
 
 class Counter32(SNMPLeafValue):
