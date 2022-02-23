@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "snmp-agent"
-version = "0.2.2"
+version = "0.2.3"
 description = "SNMP Server"
 authors = ["kthrdei <kthrd.tech@gmail.com>"]
 readme = "README.md"
