@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Dict, Tuple, Any, Optional
 import ipaddress
-
+import os
 import asn1
 
 
@@ -22,10 +22,10 @@ class Tag(object):
     def __init__(self, name, code):
         self.name = name
         self.code = code
-    
+
     def get_class(self) -> int:
         return self.code & 0xc0
-    
+
     def get_pc(self) -> int:
         return self.code & 0x20
 
@@ -57,6 +57,7 @@ class ASN1(object):
 
 
 class SNMPValue(object):
+
     def __init__(self):
         self.tag: Tag
 
@@ -65,7 +66,7 @@ class SNMPValue(object):
 
     def get_pc(self) -> int:
         return self.tag.get_pc()
-    
+
     def get_tag_number(self) -> int:
         return self.tag.get_tag_number()
 
@@ -79,8 +80,18 @@ class SNMPLeafValue(SNMPValue):
         raise NotImplementedError
 
 
+class File(SNMPLeafValue):
+    def __init__(self, value: str):
+        self.value = value
+        self.tag = ASN1.OCTET_STRING
+
+    def encode(self) -> bytes:
+        return asn1.Encoder._encode_octet_string(self.value)
+
+
 class Integer(SNMPLeafValue):
     def __init__(self, value: int):
+        super().__init__()
         self.value = value
         self.tag = ASN1.INTEGER
 
@@ -90,6 +101,7 @@ class Integer(SNMPLeafValue):
 
 class Boolean(SNMPLeafValue):
     def __init__(self, value: bool):
+        super().__init__()
         self.value = value
         self.tag = ASN1.INTEGER
 
@@ -241,8 +253,8 @@ class Encoder(object):
         self._encoder.leave()
 
     def write(self, value: SNMPLeafValue):
-        self._encoder._emit_tag(cls=value.get_class(), 
-                                typ=value.get_pc(), 
+        self._encoder._emit_tag(cls=value.get_class(),
+                                typ=value.get_pc(),
                                 nr=value.get_tag_number())
         value_bytes = value.encode()
         self._encoder._emit_length(len(value_bytes))
@@ -284,17 +296,17 @@ class Decoder(object):
 
     def enter(self):
         self._decoder.enter()
-    
+
     def read(self) -> Tuple[Any, Any]:
         # TODO: Look into response type warning
-        return self._decoder.read() # (asn1.Tag, value)
+        return self._decoder.read()  # (asn1.Tag, value)
 
     def peek(self) -> asn1.Tag:
         return self._decoder.peek()
-    
+
     def eof(self) -> bool:
         return self._decoder.eof()
-    
+
     def leave(self):
         self._decoder.leave()
 
@@ -361,13 +373,13 @@ def decode_request(data: bytes) -> SNMPRequest:
     decoder.leave()
 
     return SNMPRequest(
-                version=version, 
-                community=community, 
-                context=context,
-                request_id=request_id, 
-                non_repeaters=non_repeaters, 
-                max_repetitions=max_repetitions, 
-                variable_bindings=variable_bindings)
+        version=version,
+        community=community,
+        context=context,
+        request_id=request_id,
+        non_repeaters=non_repeaters,
+        max_repetitions=max_repetitions,
+        variable_bindings=variable_bindings)
 
 
 class SNMP(object):
@@ -377,7 +389,7 @@ class SNMP(object):
     def to_dict(self):
         dict_ = self._to_primitive(self)
         return dict_
-    
+
     def _to_primitive(self, value):
         if isinstance(value, dict):
             _dict = {}
@@ -401,7 +413,7 @@ class SNMP(object):
 class SNMPRequest(SNMP):
     def __init__(self, version: VersionValue, community: str, context: SnmpContext,
                  request_id: int, variable_bindings: List[VariableBinding],
-                 non_repeaters: int = 0, 
+                 non_repeaters: int = 0,
                  max_repetitions: int = 0):
         self.version = version
         self.community = community
@@ -410,19 +422,37 @@ class SNMPRequest(SNMP):
         self.non_repeaters = non_repeaters
         self.max_repetitions = max_repetitions
         self.variable_bindings = variable_bindings
-    
-    def create_response(self, 
+
+    def readFromFile(self, filepath)->str:
+        check_file_exist = os.path.exists(filepath)
+        if check_file_exist == False:
+            return "Variable is Empty"
+        try:
+            file1 = open(filepath, "r")
+            content = file1.read()
+            file1.close()
+        except:
+            content = "Error Read Variable"
+        return content
+    def create_response(self,
                         variable_bindings: List[VariableBinding],
                         error_status: int = 0, error_index: int = 0):
+        for var in variable_bindings:
+            isFile = isinstance(var.value, File)
+            if isFile:
+                path= var.value.value
+                newval = self.readFromFile(path)
+                var.value = OctetString(newval)
+
         return SNMPResponse(
-                 version=self.version, community=self.community, 
-                 request_id=self.request_id, 
-                 variable_bindings=variable_bindings,
-                 error_status=error_status, error_index=error_index)
-    
+            version=self.version, community=self.community,
+            request_id=self.request_id,
+            variable_bindings=variable_bindings,
+            error_status=error_status, error_index=error_index)
+
 
 class SNMPResponse(SNMP):
-    def __init__(self, version: VersionValue, community: str, request_id: int, 
+    def __init__(self, version: VersionValue, community: str, request_id: int,
                  variable_bindings: List[VariableBinding],
                  error_status: int = 0, error_index: int = 0):
         self.version = version
@@ -432,13 +462,12 @@ class SNMPResponse(SNMP):
         self.error_status = error_status
         self.error_index = error_index
         self.variable_bindings = variable_bindings
-    
+
 
 class VariableBinding(SNMP):
     def __init__(self, oid: str, value: SNMPLeafValue):
         self.oid = oid.lstrip(".")
         self.value = value
-    
+
     def encode(self):
         return self.value.encode()
-
