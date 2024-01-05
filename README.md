@@ -1,5 +1,5 @@
 # snmp-agent
-SNMP Server
+SNMP Server, included read OIDs value from the file
 
 ```
 import asyncio
@@ -27,6 +27,8 @@ async def handler(req: snmp_agent.SNMPRequest) -> snmp_agent.SNMPResponse:
             '1.3.6.1.2.1.31.1.1.1.10.1', snmp_agent.Counter64(1000)),
         snmp_agent.VariableBinding(
             '1.3.6.1.2.1.4.20.1.1.10.0.0.1', snmp_agent.IPAddress('10.0.0.1')),
+        snmp_agent.VariableBinding(
+            '1.3.6.1.4.1.50743.1.11',  File('sample_file_var.txt'))
     ]
     res_vbs = snmp_agent.utils.handle_request(req=req, vbs=vbs)
     res = req.create_response(res_vbs)

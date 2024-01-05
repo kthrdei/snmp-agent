@@ -19,19 +19,20 @@ def handle_request(req: snmp.SNMPRequest,
     return results
 
 
-def get(req_vbs: List[snmp.VariableBinding], 
+def get(req_vbs: List[snmp.VariableBinding],
         vbs: List[snmp.VariableBinding]) -> List[snmp.VariableBinding]:
     results: List[snmp.VariableBinding] = []
     for req_vb in req_vbs:
         _results = [vb for vb in vbs if req_vb.oid == vb.oid]
         if _results:
-            _result = _results[0]
+                _result = _results[0]
         else:
             _result = snmp.VariableBinding(
-                oid=req_vb.oid, 
+                oid=req_vb.oid,
                 value=snmp.NoSuchObject())
         results.append(_result)
     return results
+
 
 
 def get_next(req_vbs: List[snmp.VariableBinding], 
